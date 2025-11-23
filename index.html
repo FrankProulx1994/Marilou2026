@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Compte à rebours - Bébé Marilou</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #3b2d4f, #121212 60%);
+      color: #fff;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1100px;
+      width: 100%;
+      background: rgba(10, 10, 10, 0.9);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      margin-bottom: 8px;
+      text-align: left;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      font-weight: 400;
+      color: #f1c8ff;
+      margin-bottom: 16px;
+    }
+
+    .highlight {
+      color: #ffb3e1;
+      font-weight: 600;
+    }
+
+    .countdown-wrapper {
+      margin-top: 10px;
+      margin-bottom: 18px;
+    }
+
+    .countdown-title {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: #c9c9c9;
+    }
+
+    .countdown {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .time-box {
+      background: linear-gradient(145deg, #292933, #181820);
+      padding: 14px 16px;
+      border-radius: 14px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.06);
+      min-width: 90px;
+      flex: 1;
+    }
+
+    .time-box-value {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .label {
+      font-size: 0.8rem;
+      color: #b3b3b3;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .info {
+      margin-top: 10px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #d9d9d9;
+    }
+
+    .info strong {
+      color: #ffd580;
+    }
+
+    .week-box {
+      margin-top: 18px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .week-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+
+    .week-number {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #ffb3e1;
+    }
+
+    .progress-bar-outer {
+      width: 100%;
+      height: 8px;
+      background: #2b2b2b;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .progress-bar-inner {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ffb3e1, #ffe0b0);
+      transition: width 0.8s ease-out;
+    }
+
+    .images-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .image-card {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .image-card img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .image-caption {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    }
+
+    .footer {
+      margin-top: 18px;
+      font-size: 0.8rem;
+      color: #9c9c9c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Colonne gauche : texte + compte à rebours -->
+    <div>
+      <h1>Compte à rebours pour l’arrivée de <span class="highlight">Marilou</span></h1>
+      <h2>Kariane & Alex agrandissent la famille 💕</h2>
+
+      <div class="countdown-wrapper">
+        <div class="countdown-title">
+          Date estimée utilisée pour le compte à rebours :
+          <strong>3 mai 2026</strong>
+        </div>
+        <div class="countdown">
+          <div class="time-box">
+            <div id="days" class="time-box-value">0</div>
+            <div class="label">Jours</div>
+          </div>
+          <div class="time-box">
+            <div id="hours" class="time-box-value">00</div>
+            <div class="label">Heures</div>
+          </div>
+          <div class="time-box">
+            <div id="minutes" class="time-box-value">00</div>
+            <div class="label">Minutes</div>
+          </div>
+          <div class="time-box">
+            <div id="seconds" class="time-box-value">00</div>
+            <div class="label">Secondes</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info">
+        Fenêtre d’arrivée prévue de Marilou :
+        <strong>entre le 30 avril et le 7 mai 2026</strong>.<br />
+        Chaque jour nous rapproche un peu plus de toi, petite princesse.
+      </div>
+
+      <div class="week-box">
+        <div class="week-header">
+          <div>
+            Semaine de grossesse actuelle :
+            <span id="week-count" class="week-number">17</span>
+          </div>
+          <div style="font-size:0.85rem;color:#bdbdbd;">
+            Mise à jour tous les dimanches
+          </div>
+        </div>
+        <div class="progress-bar-outer">
+          <div id="week-progress" class="progress-bar-inner"></div>
+        </div>
+        <div style="margin-top:8px;font-size:0.8rem;color:#c4c4c4;">
+          Sur une grossesse de 40 semaines (valeur approximative).
+        </div>
+      </div>
+
+      <div class="footer">
+        Créé avec amour pour Kariane, Alex, Marilou et leurs boules de poils. 🐾
+      </div>
+    </div>
+
+    <!-- Colonne droite : photos -->
+    <div class="images-column">
+      <div class="image-card">
+        <img src="./1000000334.jpg" alt="Chiens, chat et échographie de bébé" />
+        <div class="image-caption">
+          Les grands frères & sœurs poilus surveillent déjà l’échographie.
+        </div>
+      </div>
+      <div class="image-card">
+        <img src="./1000000333.jpg" alt="Kariane et Alex heureux en tenant la bedaine" />
+        <div class="image-caption">
+          Kariane, Alex et le plus beau des sourires en attendant Marilou.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --------- Compte à rebours jusqu'à la date estimée ---------
+    const dueDate = new Date("2026-05-03T00:00:00"); // date estimée au centre de la fenêtre
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = dueDate - now;
+
+      const countdownContainer = document.querySelector(".countdown");
+
+      if (diff <= 0) {
+        countdownContainer.innerHTML =
+          "<div style='font-size:1.3rem;text-align:center;width:100%;padding:20px;'>Bienvenue au monde, <strong>Marilou</strong>! 🎀</div>";
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      document.getElementById("days").textContent = days;
+      document.getElementById("hours").textContent = hours.toString().padStart(2, "0");
+      document.getElementById("minutes").textContent = minutes.toString().padStart(2, "0");
+      document.getElementById("seconds").textContent = seconds.toString().padStart(2, "0");
+    }
+
+    // --------- Semaine de grossesse (base : 17 semaines) ---------
+    // Kariane est à 17 semaines le 23 novembre 2025 (un dimanche).
+    const baseWeeks = 17;
+    const baseDate = new Date("2025-11-23T00:00:00"); // dimanche de référence
+    const totalPregnancyWeeks = 40;
+
+    function updateWeeks() {
+      const now = new Date();
+      let weeks = baseWeeks;
+
+      if (now > baseDate) {
+        const diffMs = now - baseDate;
+        const weeksSinceBase = Math.floor(
+          diffMs / (7 * 24 * 60 * 60 * 1000)
+        );
+        weeks = baseWeeks + weeksSinceBase;
+      }
+
+      if (weeks < 0) weeks = 0;
+
+      document.getElementById("week-count").textContent = weeks;
+
+      // Mise à jour de la barre de progression (max 40 semaines)
+      const clampedWeeks = Math.min(weeks, totalPregnancyWeeks);
+      const percent = (clampedWeeks / totalPregnancyWeeks) * 100;
+      document.getElementById("week-progress").style.width = percent + "%";
+    }
+
+    function tick() {
+      updateCountdown();
+      updateWeeks();
+    }
+
+    // Lancer immédiatement puis chaque seconde pour le compte à rebours
+    tick();
+    setInterval(tick, 1000);
+  </script>
+</body>
+</html>
