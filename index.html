@@ -490,11 +490,15 @@
     tick();
     setInterval(tick, 1000);
 
-    // --------- Gestion des félicitations via Google Sheets ---------
-    const API_URL = "https://script.google.com/macros/s/AKfycbxSxICpBPM_YqnKHCj7uewM53YIlnFvuXZxA3MJ5y9thr-2MpBWGEG7R-QTuwbSocjbJA/exec"; //
+    // --------- Gestion des félicitations via JSONP (Google Sheets) ---------
+    const API_URL = "https://script.google.com/macros/s/AKfycbxSxICpBPM_YqnKHCj7uewM53YIlnFvuXZxA3MJ5y9thr-2MpBWGEG7R-QTuwbSocjbJA/exec";
 
     const form = document.getElementById("felicitation-form");
     const commentsListEl = document.getElementById("comments-list");
+
+    function clearCommentsDOM() {
+      commentsListEl.innerHTML = "";
+    }
 
     function addCommentToDOM(comment) {
       const div = document.createElement("div");
@@ -524,20 +528,20 @@
       commentsListEl.appendChild(div);
     }
 
-    async function loadComments() {
-      commentsListEl.innerHTML = "";
-      try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-
-        // On affiche les plus récents en premier
-        data.reverse().forEach(addCommentToDOM);
-      } catch (e) {
-        console.error("Erreur de chargement des commentaires :", e);
-      }
+    // Cette fonction sera appelée par le JSONP (Apps Script)
+    function handleComments(data) {
+      clearCommentsDOM();
+      // On met les plus récents en haut
+      (data || []).slice().reverse().forEach(addCommentToDOM);
     }
 
-    form.addEventListener("submit", async function (event) {
+    function loadComments() {
+      const script = document.createElement("script");
+      script.src = API_URL + "?action=list&callback=handleComments&ts=" + Date.now();
+      document.body.appendChild(script);
+    }
+
+    form.addEventListener("submit", function (event) {
       event.preventDefault();
 
       const prenom = document.getElementById("prenom").value.trim();
@@ -546,25 +550,22 @@
 
       if (!prenom || !nom || !message) return;
 
-      const payload = { prenom, nom, message };
+      // On envoie aussi via JSONP
+      const script = document.createElement("script");
+      script.src =
+        API_URL +
+        "?action=add" +
+        "&prenom=" + encodeURIComponent(prenom) +
+        "&nom=" + encodeURIComponent(nom) +
+        "&message=" + encodeURIComponent(message) +
+        "&callback=handleComments" +
+        "&ts=" + Date.now();
+      document.body.appendChild(script);
 
-      try {
-        await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
-
-        form.reset();
-        await loadComments(); // recharge la liste après ajout
-      } catch (e) {
-        console.error("Erreur d’envoi du commentaire :", e);
-      }
+      form.reset();
     });
 
-    // Charge les commentaires au démarrage
+    // Charger les commentaires au démarrage
     loadComments();
   </script>
 </body>
