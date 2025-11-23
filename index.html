@@ -16,8 +16,9 @@
       font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       padding: 20px;
     }
 
@@ -186,6 +187,141 @@
       font-size: 0.8rem;
       color: #9c9c9c;
     }
+
+    /* ===== Section félicitations ===== */
+    .comments-section {
+      max-width: 1100px;
+      width: 100%;
+      margin-top: 24px;
+      background: rgba(10, 10, 10, 0.9);
+      border-radius: 18px;
+      padding: 20px 24px 24px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .comments-section h2 {
+      margin-bottom: 6px;
+    }
+
+    .comments-section p {
+      font-size: 0.9rem;
+      color: #d0d0d0;
+      margin-bottom: 14px;
+    }
+
+    .comment-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .field {
+      flex: 1;
+      min-width: 140px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.9rem;
+    }
+
+    .field label {
+      color: #e5e5e5;
+    }
+
+    .field input,
+    .field textarea {
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: #ffb3e1;
+      box-shadow: 0 0 0 1px rgba(255, 179, 225, 0.6);
+    }
+
+    .comment-form button {
+      align-self: flex-start;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: linear-gradient(90deg, #ffb3e1, #ffe0b0);
+      color: #30142c;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .comment-form button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+    }
+
+    .comment-form button:active {
+      transform: translateY(0);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .comments-title {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      color: #f1c8ff;
+    }
+
+    #comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 0.9rem;
+    }
+
+    .comment {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      gap: 8px;
+    }
+
+    .comment-name {
+      font-weight: 600;
+      color: #ffb3e1;
+    }
+
+    .comment-date {
+      font-size: 0.75rem;
+      color: #b0b0b0;
+    }
+
+    .comment-message {
+      color: #e8e8e8;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
   </style>
 </head>
 <body>
@@ -266,6 +402,33 @@
     </div>
   </div>
 
+  <!-- Section félicitations -->
+  <div class="comments-section">
+    <h2>Donner mes félicitations 🎉</h2>
+    <p>Laisse un petit mot pour Kariane, Alex et la petite Marilou qui s’en vient.</p>
+
+    <form id="felicitation-form" class="comment-form">
+      <div class="form-row">
+        <div class="field">
+          <label for="prenom">Prénom</label>
+          <input type="text" id="prenom" name="prenom" placeholder="Prénom" required />
+        </div>
+        <div class="field">
+          <label for="nom">Nom</label>
+          <input type="text" id="nom" name="nom" placeholder="Nom" required />
+        </div>
+      </div>
+      <div class="field">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="3" placeholder="Ton message de félicitations 💌" required></textarea>
+      </div>
+      <button type="submit">Envoyer mes félicitations</button>
+    </form>
+
+    <h3 class="comments-title">Messages reçus</h3>
+    <div id="comments-list"></div>
+  </div>
+
   <script>
     // --------- Compte à rebours jusqu'à la date estimée ---------
     const dueDate = new Date("2026-05-03T00:00:00"); // date estimée au centre de la fenêtre
@@ -329,6 +492,86 @@
     // Lancer immédiatement puis chaque seconde pour le compte à rebours
     tick();
     setInterval(tick, 1000);
+
+    // --------- Gestion des félicitations ---------
+    const form = document.getElementById("felicitation-form");
+    const commentsListEl = document.getElementById("comments-list");
+    const STORAGE_KEY = "felicitations_marilou";
+    let comments = [];
+
+    function addCommentToDOM(comment) {
+      const div = document.createElement("div");
+      div.className = "comment";
+
+      const header = document.createElement("div");
+      header.className = "comment-header";
+
+      const nameEl = document.createElement("div");
+      nameEl.className = "comment-name";
+      nameEl.textContent = comment.prenom + " " + comment.nom;
+
+      const dateEl = document.createElement("div");
+      dateEl.className = "comment-date";
+      dateEl.textContent = comment.date;
+
+      header.appendChild(nameEl);
+      header.appendChild(dateEl);
+
+      const messageEl = document.createElement("div");
+      messageEl.className = "comment-message";
+      messageEl.textContent = comment.message;
+
+      div.appendChild(header);
+      div.appendChild(messageEl);
+
+      // On ajoute le nouveau commentaire en haut de la liste
+      commentsListEl.insertBefore(div, commentsListEl.firstChild);
+    }
+
+    function loadComments() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return;
+        comments = JSON.parse(saved) || [];
+        comments.forEach(addCommentToDOM);
+      } catch (e) {
+        console.error("Erreur de chargement des commentaires :", e);
+      }
+    }
+
+    function saveComments() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
+      } catch (e) {
+        console.error("Erreur de sauvegarde des commentaires :", e);
+      }
+    }
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const prenom = document.getElementById("prenom").value.trim();
+      const nom = document.getElementById("nom").value.trim();
+      const message = document.getElementById("message").value.trim();
+
+      if (!prenom || !nom || !message) {
+        return;
+      }
+
+      const date = new Date().toLocaleString("fr-CA", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
+
+      const comment = { prenom, nom, message, date };
+      comments.push(comment);
+      saveComments();
+      addCommentToDOM(comment);
+
+      form.reset();
+    });
+
+    loadComments();
   </script>
 </body>
 </html>
