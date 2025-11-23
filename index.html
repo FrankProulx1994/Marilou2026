@@ -431,7 +431,7 @@
 
   <script>
     // --------- Compte à rebours jusqu'à la date estimée ---------
-    const dueDate = new Date("2026-05-03T00:00:00"); // date estimée au centre de la fenêtre
+    const dueDate = new Date("2026-05-03T00:00:00");
 
     function updateCountdown() {
       const now = new Date();
@@ -457,9 +457,8 @@
     }
 
     // --------- Semaine de grossesse (base : 17 semaines) ---------
-    // Kariane est à 17 semaines le 23 novembre 2025 (un dimanche).
     const baseWeeks = 17;
-    const baseDate = new Date("2025-11-23T00:00:00"); // dimanche de référence
+    const baseDate = new Date("2025-11-23T00:00:00");
     const totalPregnancyWeeks = 40;
 
     function updateWeeks() {
@@ -478,7 +477,6 @@
 
       document.getElementById("week-count").textContent = weeks;
 
-      // Mise à jour de la barre de progression (max 40 semaines)
       const clampedWeeks = Math.min(weeks, totalPregnancyWeeks);
       const percent = (clampedWeeks / totalPregnancyWeeks) * 100;
       document.getElementById("week-progress").style.width = percent + "%";
@@ -489,15 +487,14 @@
       updateWeeks();
     }
 
-    // Lancer immédiatement puis chaque seconde pour le compte à rebours
     tick();
     setInterval(tick, 1000);
 
-    // --------- Gestion des félicitations ---------
+    // --------- Gestion des félicitations via Google Sheets ---------
+    const API_URL = "https://script.google.com/macros/s/AKfycbxSxICpBPM_YqnKHCj7uewM53YIlnFvuXZxA3MJ5y9thr-2MpBWGEG7R-QTuwbSocjbJA/exec"; //
+
     const form = document.getElementById("felicitation-form");
     const commentsListEl = document.getElementById("comments-list");
-    const STORAGE_KEY = "felicitations_marilou";
-    let comments = [];
 
     function addCommentToDOM(comment) {
       const div = document.createElement("div");
@@ -508,69 +505,66 @@
 
       const nameEl = document.createElement("div");
       nameEl.className = "comment-name";
-      nameEl.textContent = comment.prenom + " " + comment.nom;
+      nameEl.textContent = (comment.prenom || "") + " " + (comment.nom || "");
 
       const dateEl = document.createElement("div");
       dateEl.className = "comment-date";
-      dateEl.textContent = comment.date;
+      dateEl.textContent = comment.date || "";
 
       header.appendChild(nameEl);
       header.appendChild(dateEl);
 
       const messageEl = document.createElement("div");
       messageEl.className = "comment-message";
-      messageEl.textContent = comment.message;
+      messageEl.textContent = comment.message || "";
 
       div.appendChild(header);
       div.appendChild(messageEl);
 
-      // On ajoute le nouveau commentaire en haut de la liste
-      commentsListEl.insertBefore(div, commentsListEl.firstChild);
+      commentsListEl.appendChild(div);
     }
 
-    function loadComments() {
+    async function loadComments() {
+      commentsListEl.innerHTML = "";
       try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (!saved) return;
-        comments = JSON.parse(saved) || [];
-        comments.forEach(addCommentToDOM);
+        const res = await fetch(API_URL);
+        const data = await res.json();
+
+        // On affiche les plus récents en premier
+        data.reverse().forEach(addCommentToDOM);
       } catch (e) {
         console.error("Erreur de chargement des commentaires :", e);
       }
     }
 
-    function saveComments() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
-      } catch (e) {
-        console.error("Erreur de sauvegarde des commentaires :", e);
-      }
-    }
-
-    form.addEventListener("submit", function (event) {
+    form.addEventListener("submit", async function (event) {
       event.preventDefault();
 
       const prenom = document.getElementById("prenom").value.trim();
       const nom = document.getElementById("nom").value.trim();
       const message = document.getElementById("message").value.trim();
 
-      if (!prenom || !nom || !message) {
-        return;
+      if (!prenom || !nom || !message) return;
+
+      const payload = { prenom, nom, message };
+
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        form.reset();
+        await loadComments(); // recharge la liste après ajout
+      } catch (e) {
+        console.error("Erreur d’envoi du commentaire :", e);
       }
-
-      const date = new Date().toLocaleString("fr-CA", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
-
-      const comment = { prenom, nom, message, date };
-      comments.push(comment);
-      saveComments();
-      addCommentToDOM(comment);
-
-      form.reset();
     });
 
+    // Charge les commentaires au démarrage
     loadComments();
   </script>
 </body>
